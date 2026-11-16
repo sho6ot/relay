@@ -7,6 +7,7 @@ const paths = {
   'arrow-right': '<path d="M4 12h16m-6-6 6 6-6 6"/>',
   'arrow-left': '<path d="M20 12H4m6-6-6 6 6 6"/>',
   'arrow-up': '<path d="M12 20V4m-6 6 6-6 6 6"/>',
+  'neural-up': '<path d="M12 19V8m-4 3 4-4 4 4M5 19h14"/><circle cx="12" cy="4" r="1.5"/><circle cx="5" cy="9" r="1.5"/><circle cx="19" cy="9" r="1.5"/><path d="m6.5 8.5 4-3m3 0 4 3"/>',
   chevron: '<path d="m6 9 6 6 6-6"/>',
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
   close: '<path d="m6 6 12 12M6 18 18 6"/>',
@@ -37,5 +38,5 @@ const paths = {
 };
 
 export function icon(name, size = 20) {
-  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${paths[name] || paths.info}</svg>`;
+  return `<svg width="${size * 1.5}" height="${size * 1.5}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${paths[name] || paths.info}</svg>`;
 }

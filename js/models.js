@@ -16,6 +16,15 @@ const choose = document.querySelector('#model-choose');
 const chips = [...form.querySelectorAll('[data-task]')];
 const formatTokens = (value) => new Intl.NumberFormat('ru-RU').format(value);
 const chooseUrl = (model) => `waitlist.html?model=${encodeURIComponent(model.id)}`;
+const modelIllustrations = {
+  'Qwen/Qwen2.5-7B-Instruct': '<path d="M6 7h20v14H15l-5 4v-4H6z"/><path d="M10 12h12M10 16h8"/>',
+  'Qwen/Qwen2.5-Coder-7B-Instruct': '<rect x="5" y="6" width="22" height="20" rx="3"/><path d="m13 12-4 4 4 4m6-8 4 4-4 4m-2-9-2 10"/>',
+  'deepseek-ai/DeepSeek-R1-Distill-Qwen-7B': '<circle cx="16" cy="16" r="3"/><circle cx="7" cy="8" r="2"/><circle cx="25" cy="8" r="2"/><circle cx="7" cy="24" r="2"/><circle cx="25" cy="24" r="2"/><path d="m9 9 5 5m9-5-5 5m-9 9 5-5m9 5-5-5"/>',
+  'Qwen/Qwen2.5-VL-7B-Instruct': '<rect x="5" y="6" width="22" height="20" rx="3"/><circle cx="21" cy="12" r="2"/><path d="m7 23 7-8 4 5 2-2 5 5"/>',
+  'nomic-ai/nomic-embed-text-v1.5': '<circle cx="14" cy="14" r="7"/><path d="m19 19 7 7M10 12h8m-8 4h5"/><circle cx="24" cy="7" r="2"/>',
+  'Qwen/Qwen2.5-Coder-3B-Instruct': '<path d="M7 8h18v16H7zM7 12h18m-13 4-3 2 3 2m4 0h5"/><path d="M10 10h.01M13 10h.01"/>',
+};
+const modelIllustration = (id) => `<svg class="model-mark__illustration" width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${modelIllustrations[id] || ''}</svg>`;
 let selectedTask = 'all';
 let opener;
 
@@ -30,7 +39,7 @@ function setTask(task) {
 
 function card(model) {
   return `<article class="model-card">
-    <div class="model-card__top"><div class="model-card__identity"><span class="model-mark" aria-hidden="true">${escape(model.creator.slice(0, 1))}</span><div><h2 class="model-card__name">${escape(model.name)}</h2><p class="model-card__creator">${escape(model.creator)}</p></div></div><span class="badge badge--muted">План пилота</span></div>
+    <div class="model-card__top"><div class="model-card__identity"><span class="model-mark" aria-hidden="true">${modelIllustration(model.id)}</span><div><h2 class="model-card__name">${escape(model.name)}</h2><p class="model-card__creator">${escape(model.creator)}</p></div></div><span class="badge badge--muted">План пилота</span></div>
     <p class="model-card__description">${escape(model.description)}</p>
     <div class="model-card__tags">${model.tags.map((tag) => `<span class="badge badge--blue">${escape(tag)}</span>`).join('')}</div>
     <dl class="model-card__specs"><div><dt>Задача</dt><dd>${escape(tasks[model.task])}</dd></div><div><dt>Контекст автора</dt><dd>${formatTokens(model.contextTokens)} токенов</dd></div></dl>

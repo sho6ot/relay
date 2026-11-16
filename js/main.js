@@ -38,7 +38,7 @@ backToTop.type = 'button';
 backToTop.className = 'back-to-top';
 backToTop.setAttribute('aria-label', 'Вернуться наверх');
 backToTop.setAttribute('aria-hidden', 'true');
-backToTop.innerHTML = icon('arrow-up', 22);
+backToTop.innerHTML = icon('neural-up', 22);
 backToTop.tabIndex = -1;
 backToTop.inert = true;
 document.body.append(backToTop);
