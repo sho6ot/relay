@@ -1,6 +1,7 @@
 import { models, getModel } from './catalog.js';
 import { escape } from './ui.js';
 import { loadApplication, saveApplication, deleteApplication, validateApplication } from './applications.js';
+import { t, getLanguage } from './i18n.js';
 
 const form = document.querySelector('#application-form');
 const receipt = document.querySelector('#application-receipt');
@@ -16,6 +17,9 @@ let current = null;
 let busy = false;
 let storageReady = false;
 let loadFailed = false;
+let lastMessage = '';
+let lastMessageError = false;
+let lastErrors = {};
 
 for (const model of models) {
   const option = document.createElement('option');
@@ -35,7 +39,9 @@ if (requestedTokens && /^\d{1,16}$/.test(requestedTokens)) {
 }
 
 function message(text, isError = false) {
-  status.textContent = text;
+  lastMessage = text;
+  lastMessageError = isError;
+  status.textContent = Array.isArray(text) ? text.map(part => t(part)).join(' ') : t(text);
   status.classList.toggle('form-alert--error', isError);
   status.setAttribute('role', isError ? 'alert' : 'status');
 }
@@ -66,9 +72,10 @@ function fillForm(record) {
 }
 
 function showErrors(errors = {}) {
+  lastErrors = errors;
   for (const name of ['name', 'email', 'company', 'useCase', 'model', 'volume', 'details', 'consent']) {
     const field = form.elements[name];
-    document.getElementById(`${name}-error`).textContent = errors[name] || '';
+    document.getElementById(`${name}-error`).textContent = errors[name] ? t(errors[name]) : '';
     if (errors[name]) field.setAttribute('aria-invalid', 'true');
     else field.removeAttribute('aria-invalid');
   }
@@ -77,15 +84,15 @@ function showErrors(errors = {}) {
 function showReceipt(focus = false) {
   const model = current.model ? getModel(current.model) : null;
   const rows = [
-    ['Номер заявки', current.id],
-    ['Создана', new Date(current.createdAt).toLocaleString('ru-RU')],
-    ['Обновлена', new Date(current.updatedAt).toLocaleString('ru-RU')],
-    ['Имя', current.name], ['Email', current.email], ['Компания или проект', current.company || 'Не указаны'],
-    ['Сценарий использования', current.useCase],
-    ['Модель для пилота', model ? `${model.name} (${model.creator})` : current.model || 'Пока не определились'],
-    ['Токенов в месяц', volumes[current.volume] || current.volume],
-    ['Дополнительные детали', current.details || 'Не указаны'],
-    ['Согласие на локальное сохранение', current.consent ? 'Да' : 'Нет'],
+    [t('Номер заявки'), current.id],
+    [t('Создана'), new Date(current.createdAt).toLocaleString(getLanguage() === 'en' ? 'en-US' : 'ru-RU')],
+    [t('Обновлена'), new Date(current.updatedAt).toLocaleString(getLanguage() === 'en' ? 'en-US' : 'ru-RU')],
+    [t('Имя'), current.name], ['Email', current.email], [t('Компания или проект'), current.company || t('Не указаны')],
+    [t('Сценарий использования'), current.useCase],
+    [t('Модель для пилота'), model ? `${model.name} (${model.creator})` : current.model || t('Пока не определились')],
+    [t('Токенов в месяц'), volumes[current.volume] ? t(volumes[current.volume]) : current.volume],
+    [t('Дополнительные детали'), current.details || t('Не указаны')],
+    [t('Согласие на локальное сохранение'), t(current.consent ? 'Да' : 'Нет')],
   ];
   details.innerHTML = rows.map(([label, value]) => `<div><dt>${escape(label)}</dt><dd>${escape(value)}</dd></div>`).join('');
   form.hidden = true;
@@ -122,11 +129,11 @@ async function initialize() {
     storageReady = false;
     loadFailed = true;
     form.hidden = false;
-    message(`${errorMessage(error)} Заявка не загружена. `, true);
+    message([errorMessage(error), 'Заявка не загружена.'], true);
     const retry = document.createElement('button');
     retry.type = 'button';
     retry.className = 'text-link';
-    retry.textContent = 'Повторить';
+    retry.textContent = t('Повторить');
     retry.addEventListener('click', initialize);
     status.append(retry);
   } finally { setBusy(false); }
@@ -152,7 +159,7 @@ form.addEventListener('submit', async event => {
     message('Заявка сохранена только в этом браузере и не отправлена.');
   } catch (error) {
     if (error.fields) showErrors(error.fields);
-    message(`${errorMessage(error)} Введённые данные сохранены в форме.`, true);
+    message([errorMessage(error), 'Введённые данные сохранены в форме.'], true);
   } finally { setBusy(false); }
 });
 
@@ -210,10 +217,19 @@ confirmDelete.addEventListener('click', async () => {
     form.elements.name.focus();
   } catch (error) {
     deleteDialog.close();
-    message(`${errorMessage(error)} Заявка не удалена.`, true);
+    message([errorMessage(error), 'Заявка не удалена.'], true);
   } finally {
     setBusy(false);
     if (current) document.querySelector('#delete-application').focus();
+  }
+});
+window.addEventListener('relay:language', () => {
+  showErrors(lastErrors);
+  if (current && !receipt.hidden) showReceipt();
+  if (lastMessage) {
+    const retry = status.querySelector('button');
+    message(lastMessage, lastMessageError);
+    if (retry) { retry.textContent = t('Повторить'); status.append(retry); }
   }
 });
 

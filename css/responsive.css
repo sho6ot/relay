@@ -26,6 +26,8 @@
   .footer-grid { grid-template-columns: 1fr; gap: 30px; }
   .footer-nav a { min-height: 44px; }
   .footer-contacts li { min-height: 32px; }
+  .preferences { width: 100%; padding-block: 6px; }
+  .compare-bar { bottom: 8px; }
   .footer-bottom { margin-top: 30px; }
 }
 @media (max-width: 500px) {
@@ -41,6 +43,11 @@
   .receipt__details > div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
   .dialog__header, .dialog__footer { padding: 16px 18px; }
   .dialog__body { padding: 20px 18px; }
+  .account-panel { padding: 22px; }
+  .compare-bar { align-items: stretch; }
+  .compare-bar .button { flex: 1 1 auto; }
+  .compare-dialog .dialog__body { padding-inline: 12px; }
+  .compare-table th, .compare-table td { padding: 10px; }
   .dialog__footer .button { flex: 1 1 auto; }
   .back-to-top { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); }
 }
