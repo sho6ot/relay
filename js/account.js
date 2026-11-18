@@ -1,7 +1,7 @@
 import { currentUser, register, login, logout, getFavorites } from './accounts.js';
-import { getModel } from './catalog.js';
+import { getModel, tasks } from './catalog.js';
 import { t } from './i18n.js';
-import { escape } from './ui.js';
+import { escape, icon } from './ui.js';
 
 const content = document.querySelector('#account-content');
 let mode = 'login';
@@ -16,18 +16,91 @@ async function render() {
     user = await currentUser();
     favorites = user ? await getFavorites() : [];
   } catch {
-    if (version === renderVersion) content.textContent = t('Local storage is unavailable.');
+    if (version === renderVersion) content.innerHTML = `<div class="account-panel" role="status">${copy('Local storage is unavailable.')}</div>`;
     return;
   }
   if (version !== renderVersion) return;
-  const notice = `<p>${escape(t('Accounts and favorites are stored only in this browser. Clearing site data removes them.'))}</p><p>${escape(t('This local account does not protect data from other people using this browser. The existing early access application is shared in this browser and is not private to an account.'))}</p><p>${escape(t('Passwords are stored as salted hashes, not copied to the application.'))}</p>`;
-  if (user) {
-    const items = favorites.map(getModel).filter(Boolean);
-    content.innerHTML = `<h1>${escape(t('Account'))}</h1><p>${escape(user.name)} · ${escape(user.email)}</p>${notice}<button class="button button--secondary" type="button" data-logout>${escape(t('Sign out'))}</button><h2>${escape(t('Your favorites'))}</h2>${items.length ? `<ul>${items.map((model) => `<li><a href="models.html">${escape(model.name)}</a></li>`).join('')}</ul>` : `<p>${escape(t('No favorites yet.'))}</p>`}<a class="text-link" href="models.html">${escape(t('Browse models'))}</a>`;
-    return;
-  }
-  const creating = mode === 'register';
-  content.innerHTML = `<h1>${escape(t('Local account'))}</h1>${notice}<h2>${escape(t(creating ? 'Create account' : 'Sign in'))}</h2><form class="account-form" novalidate>${creating ? `<label class="field"><span class="field__label">${escape(t('Name'))}</span><input name="name" autocomplete="name" required></label>` : ''}<label class="field"><span class="field__label">${escape(t('Email'))}</span><input name="email" type="email" autocomplete="email" required></label><label class="field"><span class="field__label">${escape(t('Password'))}</span><input name="password" type="password" autocomplete="${creating ? 'new-password' : 'current-password'}" minlength="8" required></label><p role="status" aria-live="polite">${escape(message ? t(message) : '')}</p><button class="button button--primary" type="submit">${escape(t(creating ? 'Register' : 'Sign in'))}</button></form><p>${escape(t(creating ? 'Already have an account?' : 'New here?'))} <button class="text-link" type="button" data-mode>${escape(t(creating ? 'Sign in' : 'Create account'))}</button></p>`;
+  content.innerHTML = user ? renderProfile(user, favorites) : renderAuth(mode === 'register');
+}
+
+const copy = key => escape(t(key));
+
+function renderPrivacy() {
+  return `<details class="account-privacy">
+    <summary>${icon('shield', 16)} ${copy('About data storage')}</summary>
+    <div>
+      <p>${copy('Accounts and favorites are stored only in this browser. Clearing site data removes them.')}</p>
+      <p>${copy('This local account does not protect data from other people using this browser. The existing early access application is shared in this browser and is not private to an account.')}</p>
+      <p>${copy('Passwords are stored as salted hashes, not copied to the application.')}</p>
+    </div>
+  </details>`;
+}
+
+function renderAuth(creating) {
+  return `<div class="row g-4 align-items-stretch">
+    <div class="col-12 col-lg-6">
+      <div class="account-panel account-panel--auth">
+        <p class="eyebrow">${copy('Local account')}</p>
+        <h1>${copy(creating ? 'Create account' : 'Sign in')}</h1>
+        <form class="account-form" novalidate>
+          ${creating ? `<label class="field"><span class="field__label">${copy('Name')}</span><input name="name" autocomplete="name" required></label>` : ''}
+          <label class="field"><span class="field__label">${copy('Email')}</span><input name="email" type="email" autocomplete="email" required></label>
+          <label class="field"><span class="field__label">${copy('Password')}</span><input name="password" type="password" autocomplete="${creating ? 'new-password' : 'current-password'}" minlength="8" required></label>
+          <p class="account-error" role="status" aria-live="polite">${message ? copy(message) : ''}</p>
+          <button class="button button--primary" type="submit">${copy(creating ? 'Register' : 'Sign in')} ${icon('arrow-right', 15)}</button>
+        </form>
+        <p class="account-switch">${copy(creating ? 'Already have an account?' : 'New here?')} <button class="text-link" type="button" data-mode>${copy(creating ? 'Sign in' : 'Create account')}</button></p>
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <aside class="account-panel account-story">
+        <div class="account-story__route" aria-hidden="true">
+          <span>${icon('layers', 22)}</span><i></i><span>${icon('relay', 28)}</span><i></i><span>${icon('check', 22)}</span>
+        </div>
+        <h2>${copy('Keep the right models close.')}</h2>
+        <p>${copy('Save models from the catalog and get back to them here.')}</p>
+        ${renderPrivacy()}
+      </aside>
+    </div>
+  </div>`;
+}
+
+function renderProfile(user, favorites) {
+  const items = favorites.map(getModel).filter(Boolean);
+  return `<h1 class="account-title">${copy('Account')}</h1>
+    <div class="row g-4 align-items-start">
+      <div class="col-12 col-lg-4">
+        <section class="account-panel account-profile">
+          <div class="account-profile__avatar" aria-hidden="true">${escape(Array.from(user.name)[0].toUpperCase())}</div>
+          <h2>${escape(user.name)}</h2>
+          <p>${escape(user.email)}</p>
+          <button class="button button--secondary button--small" type="button" data-logout>${copy('Sign out')}</button>
+          ${renderPrivacy()}
+        </section>
+      </div>
+      <div class="col-12 col-lg-8">
+        <section class="account-panel">
+          <div class="account-favorites__header">
+            <h2>${copy('Your favorites')} <span class="badge badge--muted">${items.length}</span></h2>
+            ${items.length ? browseLink() : ''}
+          </div>
+          ${items.length ? `<ul class="account-models row g-3">${items.map(model => `<li class="col-12 col-md-6"><article class="account-model">
+            <span class="badge badge--muted">${copy(tasks[model.task])}</span>
+            <h3>${escape(model.name)}</h3>
+            <p>${escape(model.creator)}</p>
+          </article></li>`).join('')}</ul>` : `<div class="account-empty">
+            <span class="account-empty__icon">${icon('layers', 22)}</span>
+            <h3>${copy('No favorites yet.')}</h3>
+            <p>${copy('Add a model to favorites in the catalog to see it here.')}</p>
+            ${browseLink()}
+          </div>`}
+        </section>
+      </div>
+    </div>`;
+}
+
+function browseLink() {
+  return `<a class="button button--secondary button--small" href="models.html">${copy('Browse models')} ${icon('arrow-right', 14)}</a>`;
 }
 
 content.addEventListener('click', (event) => {

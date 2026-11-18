@@ -45,7 +45,6 @@
   .receipt__details > div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
   .dialog__header, .dialog__footer { padding: 16px 18px; }
   .dialog__body { padding: 20px 18px; }
-  .account-panel { padding: 22px; }
   .compare-bar { align-items: stretch; }
   .compare-bar .button { flex: 1 1 auto; }
   .compare-dialog .dialog__body { padding-inline: 12px; }
