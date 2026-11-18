@@ -77,7 +77,7 @@ document.addEventListener('click', event => {
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape' && menu?.classList.contains('is-open')) closeMenu({ focus: true });
 });
-matchMedia('(min-width: 721px)').addEventListener('change', event => { if (event.matches) closeMenu(); });
+matchMedia('(min-width: 901px)').addEventListener('change', event => { if (event.matches) closeMenu(); });
 
 const backToTop = document.createElement('button');
 backToTop.type = 'button';

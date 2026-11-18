@@ -5,15 +5,18 @@
   .architecture { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .waitlist-layout { grid-template-columns: minmax(0, 1fr) minmax(240px, .6fr); }
 }
-@media (max-width: 720px) {
-  .container { width: calc(100% - 32px); }
-  .section { padding-block: 64px; }
+@media (max-width: 900px) {
   .header-inner { position: relative; flex-wrap: wrap; gap: 0; min-height: 68px; }
   .menu-toggle { display: inline-grid; }
-  .site-nav { flex: 0 0 100%; flex-direction: column; align-items: stretch; gap: 2px; padding: 6px 0 16px; }
+  .site-nav { flex: 0 0 100%; flex-direction: column; align-items: stretch; gap: 2px; margin-left: 0; padding: 6px 0 16px; }
   .js .site-nav { max-height: 340px; overflow: hidden; opacity: 1; visibility: visible; transition: max-height 300ms var(--ease), opacity 260ms var(--ease), padding 300ms var(--ease), visibility 0s; }
   .js .site-nav:not(.is-open) { max-height: 0; padding-block: 0; opacity: 0; visibility: hidden; }
   .site-nav .button { margin: 8px 0 0; }
+  .preferences { width: 100%; padding: 8px 0; margin: 0; border-left: 0; border-top: 1px solid var(--line); }
+}
+@media (max-width: 720px) {
+  .container { width: calc(100% - 32px); }
+  .section { padding-block: 64px; }
   .hero { padding-block: 56px 64px; }
   .hero > .container, .hero.container { grid-template-columns: minmax(0, 1fr); }
   .hero h1 { max-width: 13ch; font-size: clamp(40px, 9vw, 54px); }
@@ -26,7 +29,6 @@
   .footer-grid { grid-template-columns: 1fr; gap: 30px; }
   .footer-nav a { min-height: 44px; }
   .footer-contacts li { min-height: 32px; }
-  .preferences { width: 100%; padding-block: 6px; }
   .compare-bar { bottom: 8px; }
   .footer-bottom { margin-top: 30px; }
 }
@@ -53,4 +55,5 @@
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
+  .button:hover:not(:disabled), .button:active:not(:disabled), .button:hover:not(:disabled) svg, .text-link:hover svg { transform: none; }
 }
